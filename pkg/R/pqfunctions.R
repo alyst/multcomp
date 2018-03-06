@@ -34,14 +34,14 @@ pqglht <- function(object)
         }
 
         switch(object$alternative, "two.sided" = {
-            if (df > 0) pvals <- 2*(1 - pt(abs(tstat),df))     
-            else        pvals <- 2*(1 - pnorm(abs(tstat)))
+            if (df > 0) pvals <- 2*pmin(pt(tstat,df), pt(tstat,df, lower.tail = FALSE))
+            else        pvals <- 2*pmin(pnorm(tstat), pnorm(tstat, lower.tail = FALSE))
         }, "less" = {
             if (df > 0) pvals <- pt(tstat,df) 
             else        pvals <- pnorm(tstat)
         }, "greater" = {
-            if (df > 0) pvals <- 1 - pt(tstat,df)
-            else        pvals <- 1 - pnorm(tstat)
+            if (df > 0) pvals <- pt(tstat,df, lower.tail = FALSE)
+            else        pvals <- pnorm(tstat, lower.tail = FALSE)
         })
 
         if (type == "univariate")

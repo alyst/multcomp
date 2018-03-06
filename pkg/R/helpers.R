@@ -126,8 +126,15 @@ modelparm.default <- function(model, coef. = coef,
              sQuote("model"), " found!")       
     sigma <- as.matrix(sigma)
 
-    if (any(length(beta) != dim(sigma))) 
-        stop("dimensions of coefficients and covariance matrix don't match")
+    missing_coefs <- setdiff(names(beta), rownames(sigma))
+    if (length(missing_coefs) > 0) {
+        warning("\n Coefficients provided by model",
+                " are not found within the effects of vcov model matrix",
+                ": ", paste(missing_coefs, collapse=" "))
+        beta <- beta[names(beta) %in% rownames(sigma), drop=FALSE]
+    }
+    #if (any(length(beta) != dim(sigma))) 
+    #    stop("dimensions of coefficients and covariance matrix don't match")
 
     ### determine degrees of freedom
     if (is.null(df)) {
@@ -146,7 +153,7 @@ modelparm.default <- function(model, coef. = coef,
     ### try to identify non-estimable coefficients
     ### coef.aov removes NAs, thus touch coefficients 
     ### directly
-    ocoef <- coef.(model)
+    ocoef <- beta
     if (inherits(model, "aov")) ocoef <- model$coefficients
     estimable <- rep(TRUE, length(ocoef))
     if (any(is.na(ocoef))) {
